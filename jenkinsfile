@@ -15,7 +15,7 @@ pipeline {
 
         stage('Setup Python') {
             steps {
-                bat '"C:\Users\Shijo\AppData\Local\Programs\Python\Python313\\python.exe" --version'
+                bat '"C:\\Users\\Shijo\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" --version'
             }
         }
 
