@@ -7,7 +7,7 @@ groovy
        stages {
            stage('Checkout') {
                steps {
-                   git 'https://github.com/your-username/python-webapp.git'
+                   git 'https://github.com/sherinsaji126/My_Azure_Full_Project_2_python.git'
                }
            }
            stage('Build') {
