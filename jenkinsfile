@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         AZURE_CREDENTIALS_ID = 'azure-service-principal-2'
-        RESOURCE_GROUP = 'rg-jenkins'
+        RESOURCE_GROUP = 'rg-jenkins-126'
         APP_SERVICE_NAME = 'sherin-python-api'
     }
 
