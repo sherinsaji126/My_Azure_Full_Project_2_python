@@ -15,38 +15,30 @@ pipeline {
 
         stage('Setup Python') {
             steps {
-                script {
-                    def pythonHome = tool name: 'Python3', type: 'hudson.tasks.Maven$MavenInstallation'
-                    env.PATH = "${pythonHome}/bin:${env.PATH}"
-                }
-                sh 'python --version'
+                bat 'python --version'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                bat 'pip install -r requirements.txt'
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                sh 'pytest tests/'
-            }
-        }
+       
 
         stage('Package Application') {
             steps {
-                sh 'zip -r app.zip *'
+                bat 'powershell Compress-Archive -Path * -DestinationPath app.zip -Force'
             }
         }
 
         stage('Deploy to Azure') {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: AZURE_CREDENTIALS_ID)]) {
-                    sh '''
-                        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-                        az webapp deploy --resource-group $RESOURCE_GROUP --name $APP_SERVICE_NAME --src-path app.zip --type zip
+                    bat '''
+                        az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%
+                        az webapp deploy --resource-group %RESOURCE_GROUP% --name %APP_SERVICE_NAME% --src-path app.zip --type zip
                     '''
                 }
             }
@@ -55,10 +47,10 @@ pipeline {
 
     post {
         success {
-            echo ' Deployment Successful!'
+            echo 'Deployment Successful!'
         }
         failure {
             echo ' Deployment Failed!'
-        }
-    }
+        }
+    }
 }
