@@ -16,6 +16,7 @@ pipeline {
         stage('Setup Python') {
             steps {
                 bat 'python --version'
+                bat 'pip --version'
             }
         }
 
@@ -25,10 +26,9 @@ pipeline {
             }
         }
 
-       
-
         stage('Package Application') {
             steps {
+                bat 'if exist app.zip del app.zip'
                 bat 'powershell Compress-Archive -Path * -DestinationPath app.zip -Force'
             }
         }
@@ -50,7 +50,7 @@ pipeline {
             echo 'Deployment Successful!'
         }
         failure {
-            echo ' Deployment Failed!'
-        }
-    }
+            echo 'Deployment Failed!'
+        }
+    }
 }
