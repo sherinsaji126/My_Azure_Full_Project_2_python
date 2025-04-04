@@ -1,56 +1,44 @@
 pipeline {
     agent any
     environment {
-        AZURE_CREDENTIALS_ID = 'azure-service-principal-2'
-        RESOURCE_GROUP = 'rg-jenkins-126'
-        APP_SERVICE_NAME = 'sherin-python-api'
+        AZURE_CREDENTIALS_ID = 'azure-service-principal'
+        RESOURCE_GROUP = 'rg-jenkins'
+        APP_SERVICE_NAME = 'webapijenkins84758'
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/sherinsaji126/My_Azure_Full_Project_2_python.git'
+                git branch: 'master', url: 'https://github.com/Cloud-Authority/WebApiJenkins.git'
             }
         }
 
-        stage('Setup Python') {
+        stage('Build') {
             steps {
-                bat '"C:\\Users\\Shijo\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" --version'
+                echo 'Creating virtual environment and installing dependencies...'
+                bat 'python -m venv venv'
+                bat '.\\venv\\Scripts\\activate && pip install -r requirements.txt'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Deploy') {
             steps {
-                bat '"C:\\Users\\Shijo\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install --upgrade pip'
-                bat '"C:\\Users\\Shijo\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install -r requirements.txt'
-            }
-        }
-
-        stage('Package Application') {
-            steps {
-                bat 'powershell.exe -Command "Compress-Archive -Path * -DestinationPath app.zip -Force"'
-            }
-        }
-
-        stage('Deploy to Azure') {
-            steps {
+                echo 'Packaging and deploying the Python app...'
                 withCredentials([azureServicePrincipal(credentialsId: AZURE_CREDENTIALS_ID)]) {
-                    bat '''
-                        az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%
-                        az webapp deployment source config-zip --resource-group %RESOURCE_GROUP% --name %APP_SERVICE_NAME% --src app.zip
-                    '''
+                    bat "az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%"
+                    bat "powershell Compress-Archive -Path * -DestinationPath python_app.zip -Force"
+                    bat "az webapp deploy --resource-group %RESOURCE_GROUP% --name %APP_SERVICE_NAME% --src-path python_app.zip --type zip"
                 }
             }
         }
     }
 
-       post {
+    post {
         success {
-            echo '🚀 Deployment Successful!'
+            echo 'Deployment Successful!'
         }
         failure {
-            echo '❌ Deployment Failed!'
+            echo 'Deployment Failed!'
         }
     }
-
 }
