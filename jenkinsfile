@@ -3,13 +3,13 @@ pipeline {
     environment {
         AZURE_CREDENTIALS_ID = 'azure-service-principal'
         RESOURCE_GROUP = 'rg-jenkins'
-        APP_SERVICE_NAME = 'webapijenkins676282'
+        APP_SERVICE_NAME = 'sherin-python-api'
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/khushboo-289/python-application.git'
+                git branch: 'master', url: 'https://github.com/sherinsaji126/My_Azure_Full_Project_2_python.git'
             }
         }
 
