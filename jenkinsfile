@@ -48,7 +48,7 @@ pipeline {
         success {
             echo '🚀 Deployment Successful!'
         }
-        failure {
+    failure{
             echo '❌ Deployment Failed!'
         }
     }
