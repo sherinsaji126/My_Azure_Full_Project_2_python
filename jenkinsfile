@@ -1,33 +1,64 @@
-groovy
-   pipeline {
-       agent any
-       environment {
-           AZURE_CREDENTIALS = credentials('azure-service-principal')
-       }
-       stages {
-           stage('Checkout') {
-               steps {
-                   git 'https://github.com/sherinsaji126/My_Azure_Full_Project_2_python.git'
-               }
-           }
-           stage('Build') {
-               steps {
-                   sh 'pip install -r requirements.txt'
-               }
-           }
-           stage('Publish') {
-               steps {
-                   sh 'zip -r app.zip .'
-               }
-           }
-           stage('Deploy to Azure') {
-               steps {
-                   withCredentials([azureServicePrincipal('azure-service-principal')]) {
-                       sh 'az login --service-principal -u $AZURE_CREDENTIALS_USR -p $AZURE_CREDENTIALS_PSW --tenant $AZURE_CREDENTIALS_TEN'
-                       sh 'az webapp up --name myPythonApp --resource-group myResourceGroup --runtime "PYTHON:3.9" --src-path .'
-                   }
-               }
-           }
-       }
-   }
+pipeline {
+    agent any
+    environment {
+        AZURE_CREDENTIALS_ID = 'azure-service-principal'
+        RESOURCE_GROUP = 'rg-jenkins'
+        APP_SERVICE_NAME = 'webapijenkins676282'
+    }
 
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'master', url: 'https://github.com/khushboo-289/python-application.git'
+            }
+        }
+
+        stage('Setup Python') {
+            steps {
+                script {
+                    def pythonHome = tool name: 'Python3', type: 'hudson.tasks.Maven$MavenInstallation'
+                    env.PATH = "${pythonHome}/bin:${env.PATH}"
+                }
+                sh 'python --version'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'pytest tests/'
+            }
+        }
+
+        stage('Package Application') {
+            steps {
+                sh 'zip -r app.zip *'
+            }
+        }
+
+        stage('Deploy to Azure') {
+            steps {
+                withCredentials([azureServicePrincipal(credentialsId: AZURE_CREDENTIALS_ID)]) {
+                    sh '''
+                        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+                        az webapp deploy --resource-group $RESOURCE_GROUP --name $APP_SERVICE_NAME --src-path app.zip --type zip
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo ' Deployment Successful!'
+        }
+        failure {
+            echo ' Deployment Failed!'
+        }
+    }
+}
